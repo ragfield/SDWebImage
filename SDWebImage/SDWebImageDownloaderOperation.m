@@ -10,6 +10,8 @@
 #import "SDWebImageDecoder.h"
 #import <ImageIO/ImageIO.h>
 
+#import "NSData+RAdditions.h"
+
 @interface SDWebImageDownloaderOperation ()
 
 @property (copy, nonatomic) SDWebImageDownloaderProgressBlock progressBlock;
@@ -182,7 +184,7 @@
 {
     dispatch_async(self.queue, ^
     {
-        [self.imageData appendData:data];
+		[self.imageData appendData:data];
 
         if ((self.options & SDWebImageDownloaderProgressiveDownload) && self.expectedSize > 0 && self.completedBlock)
         {
@@ -275,6 +277,13 @@
     {
         dispatch_async(self.queue, ^
         {
+			if ([self.imageData isBase64DataR]) {
+				NSMutableData *decoded = [self.imageData base64DecodedDataR];
+				if (decoded) {
+					self.imageData = decoded;
+				}
+			}
+			
             UIImage *image = [UIImage decodedImageWithImage:SDScaledImageForPath(self.request.URL.absoluteString, self.imageData)];
             dispatch_async(dispatch_get_main_queue(), ^
             {
